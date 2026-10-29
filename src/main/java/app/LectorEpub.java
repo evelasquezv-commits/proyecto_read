@@ -1,3 +1,4 @@
+
 package app;
 
 import java.io.IOException;
@@ -5,9 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
-import com.github.mertakdut.Reader;
 import com.github.mertakdut.BookSection;
+import com.github.mertakdut.Reader;
 
 public class LectorEpub {
 
@@ -18,7 +20,7 @@ public class LectorEpub {
 
         return archivo.getFileName()
                 .toString()
-                .toLowerCase()
+                .toLowerCase(Locale.ROOT)
                 .endsWith(".epub");
     }
 
@@ -30,7 +32,9 @@ public class LectorEpub {
         }
 
         if (!Files.isRegularFile(archivo)) {
-            throw new IOException("El archivo no existe: " + archivo);
+            throw new IOException(
+                    "El archivo no existe o no es un archivo válido: " + archivo
+            );
         }
 
         List<String> secciones = new ArrayList<>();
@@ -44,18 +48,7 @@ public class LectorEpub {
             int pagina = 0;
 
             while (true) {
-                BookSection seccion;
-
-                try {
-                    seccion = lector.readSection(pagina);
-                } catch (Exception e) {
-                    // Si ya se obtuvo contenido, terminamos la lectura.
-                    if (!secciones.isEmpty()) {
-                        break;
-                    }
-
-                    throw e;
-                }
+                BookSection seccion = lector.readSection(pagina);
 
                 if (seccion == null) {
                     break;
@@ -72,7 +65,9 @@ public class LectorEpub {
 
         } catch (Exception e) {
             throw new IOException(
-                    "No se pudo leer el libro EPUB: " + e.getMessage(), e
+                    "No se pudo completar la lectura del EPUB: "
+                            + e.getMessage(),
+                    e
             );
         }
 
